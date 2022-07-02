@@ -12,6 +12,7 @@
     "vite": "^2.9.9"
   },
   "dependencies": {
-    "@babylonjs/core": "^5.13.3"
+    "@babylonjs/core": "^5.13.3",
+    "sass": "^1.53.0"
   }
 }
