@@ -7,7 +7,7 @@ import {
   WebXRDefaultExperience,
 } from '@babylonjs/core';
 
-class BabylonApp {
+export default class BabylonApp {
   private engine: Engine;
 
   private scene: Scene;
@@ -48,11 +48,5 @@ class BabylonApp {
 
     const box = MeshBuilder.CreateBox('box', { size: 0.2 }, this.scene);
     box.position = new Vector3(0, 0.1, 0);
-
-    this.engine.runRenderLoop(() => {
-      this.scene.render();
-    });
   };
 }
-
-export { BabylonApp };

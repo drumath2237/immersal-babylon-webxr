@@ -1,4 +1,4 @@
-import { BabylonApp } from './BabylonApp';
+import BabylonApp from './BabylonApp';
 import './style.scss';
 
 const main = () => {
