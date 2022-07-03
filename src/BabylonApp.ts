@@ -24,6 +24,8 @@ class BabylonApp {
       .createDefaultXRExperienceAsync({
         uiOptions: {
           sessionMode: 'immersive-ar',
+          referenceSpaceType: 'unbounded',
+          optionalFeatures: ['camera-access'],
         },
       })
       .then((xr) => {
@@ -41,7 +43,6 @@ class BabylonApp {
 
   private InitScene = () => {
     this.scene.createDefaultCamera(true, true, true);
-    this.scene.createDefaultEnvironment();
 
     new DirectionalLight('light', new Vector3(0.4, -1, 0.6), this.scene);
 
