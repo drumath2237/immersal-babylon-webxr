@@ -10,7 +10,7 @@ const main = () => {
     return;
   }
 
-  const babylonApp = new BabylonApp(renderCanvas);
+  new BabylonApp(renderCanvas);
 };
 
 main();

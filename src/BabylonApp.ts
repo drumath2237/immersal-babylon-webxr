@@ -1,20 +1,34 @@
 import {
+  BaseTexture,
   DirectionalLight,
   Engine,
   MeshBuilder,
   Scene,
   Vector3,
+  WebXRDefaultExperience,
 } from "@babylonjs/core";
 
 class BabylonApp {
   private engine: Engine;
   private scene: Scene;
 
+  private xr?: WebXRDefaultExperience;
+
   public constructor(renderCanvas: HTMLCanvasElement) {
     this.engine = new Engine(renderCanvas, true);
     this.scene = new Scene(this.engine);
 
-    this.Init();
+    this.InitScene();
+
+    this.scene
+      .createDefaultXRExperienceAsync({
+        uiOptions: {
+          sessionMode: "immersive-ar",
+        },
+      })
+      .then((xr) => {
+        this.xr = xr;
+      });
 
     this.engine.runRenderLoop(() => {
       this.scene.render();
@@ -25,7 +39,7 @@ class BabylonApp {
     });
   }
 
-  private Init = () => {
+  private InitScene = () => {
     this.scene.createDefaultCamera(true, true, true);
     this.scene.createDefaultEnvironment();
 
@@ -37,6 +51,36 @@ class BabylonApp {
     this.engine.runRenderLoop(() => {
       this.scene.render();
     });
+  };
+
+  private CreateCameraTexture = async (
+    frame: XRFrame
+  ): Promise<Uint8Array | null> => {
+    if (!this.xr) {
+      return null;
+    }
+
+    const viewerPose = frame.getViewerPose(
+      this.xr.baseExperience.sessionManager.referenceSpace
+    );
+    const view = viewerPose?.views[0];
+
+    const bindings = new XRWebGLBinding(frame.session, this.engine._gl);
+    const cameraWebGLTexture = (bindings as any).getCameraImage(
+      (view as any).camera
+    ) as WebGLTexture;
+
+    const cameraInternalTexture =
+      this.engine.wrapWebGLTexture(cameraWebGLTexture);
+    const baseTexture = new BaseTexture(this.engine);
+    baseTexture._texture = cameraInternalTexture;
+
+    const arrayView = await baseTexture.readPixels();
+    if (arrayView === null) {
+      return null;
+    }
+
+    return new Uint8Array(arrayView.buffer);
   };
 }
 
