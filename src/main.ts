@@ -1,9 +1,9 @@
-import { BabylonApp } from "./BabylonApp";
-import "./style.scss";
+import { BabylonApp } from './BabylonApp';
+import './style.scss';
 
 const main = () => {
   const renderCanvas = <HTMLCanvasElement>(
-    document.getElementById("renderCanvas")
+    document.getElementById('renderCanvas')
   );
 
   if (!renderCanvas) {
