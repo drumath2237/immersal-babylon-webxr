@@ -1,11 +1,11 @@
 import { BaseTexture, Engine } from "@babylonjs/core";
 import { CameraIntrinsics } from "./CameraIntrinsics";
 
-const CreateCameraTextureAsync = async (
+const createCameraTexture = (
   engine: Engine,
   referenceSpace: XRReferenceSpace,
   frame: XRFrame
-): Promise<Uint8Array | null> => {
+): BaseTexture | null => {
   const viewerPose = frame.getViewerPose(referenceSpace);
 
   if (!viewerPose) {
@@ -19,17 +19,38 @@ const CreateCameraTextureAsync = async (
     (view as any).camera
   ) as WebGLTexture;
 
+  if (!cameraWebGLTexture) {
+    console.error("cannot get camera WebGLTexture Object");
+    return null;
+  }
+
   const cameraInternalTexture = engine.wrapWebGLTexture(cameraWebGLTexture);
   const baseTexture = new BaseTexture(engine);
   baseTexture._texture = cameraInternalTexture;
 
+  return baseTexture;
+};
+
+const convertTextureToUint8ArrayAsync = async (
+  baseTexture: BaseTexture
+): Promise<Uint8ClampedArray | null> => {
   const arrayView = await baseTexture.readPixels();
   if (arrayView === null) {
     console.error("cannot read pixels");
     return null;
   }
 
-  return new Uint8Array(arrayView.buffer);
+  return new Uint8ClampedArray(arrayView.buffer);
+};
+
+const convertTextureToImageDataAsync = async (
+  baseTexture: BaseTexture
+): Promise<ImageData | null> => {
+  const imageBufferArray = await convertTextureToUint8ArrayAsync(baseTexture);
+  if (imageBufferArray === null) {
+    return null;
+  }
+  return new ImageData(imageBufferArray, baseTexture.getSize().width);
 };
 
 const getCameraIntrinsics = (
@@ -56,4 +77,10 @@ const getCameraIntrinsics = (
       y: ay,
     },
   };
+};
+
+export {
+  createCameraTexture,
+  convertTextureToImageDataAsync,
+  getCameraIntrinsics,
 };
