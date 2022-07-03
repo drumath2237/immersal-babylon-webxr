@@ -1,5 +1,5 @@
-import { BaseTexture, Engine } from "@babylonjs/core";
-import { CameraIntrinsics } from "./CameraIntrinsics";
+import { BaseTexture, Engine } from '@babylonjs/core';
+import { CameraIntrinsics } from './CameraIntrinsics';
 
 const createCameraTexture = (
   engine: Engine,
@@ -9,7 +9,7 @@ const createCameraTexture = (
   const viewerPose = frame.getViewerPose(referenceSpace);
 
   if (!viewerPose) {
-    console.error("viewerPose is null");
+    console.error('viewerPose is null');
     return null;
   }
   const view = viewerPose.views[0];
@@ -20,7 +20,7 @@ const createCameraTexture = (
   ) as WebGLTexture;
 
   if (!cameraWebGLTexture) {
-    console.error("cannot get camera WebGLTexture Object");
+    console.error('cannot get camera WebGLTexture Object');
     return null;
   }
 
@@ -36,7 +36,7 @@ const convertTextureToUint8ArrayAsync = async (
 ): Promise<Uint8ClampedArray | null> => {
   const arrayView = await baseTexture.readPixels();
   if (arrayView === null) {
-    console.error("cannot read pixels");
+    console.error('cannot read pixels');
     return null;
   }
 

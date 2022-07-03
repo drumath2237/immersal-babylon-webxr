@@ -5,10 +5,11 @@ import {
   Scene,
   Vector3,
   WebXRDefaultExperience,
-} from "@babylonjs/core";
+} from '@babylonjs/core';
 
 class BabylonApp {
   private engine: Engine;
+
   private scene: Scene;
 
   private xr?: WebXRDefaultExperience;
@@ -22,7 +23,7 @@ class BabylonApp {
     this.scene
       .createDefaultXRExperienceAsync({
         uiOptions: {
-          sessionMode: "immersive-ar",
+          sessionMode: 'immersive-ar',
         },
       })
       .then((xr) => {
@@ -33,7 +34,7 @@ class BabylonApp {
       this.scene.render();
     });
 
-    document.addEventListener("resize", () => {
+    document.addEventListener('resize', () => {
       this.engine.resize();
     });
   }
@@ -42,9 +43,9 @@ class BabylonApp {
     this.scene.createDefaultCamera(true, true, true);
     this.scene.createDefaultEnvironment();
 
-    new DirectionalLight("light", new Vector3(0.4, -1, 0.6), this.scene);
+    new DirectionalLight('light', new Vector3(0.4, -1, 0.6), this.scene);
 
-    const box = MeshBuilder.CreateBox("box", { size: 0.2 }, this.scene);
+    const box = MeshBuilder.CreateBox('box', { size: 0.2 }, this.scene);
     box.position = new Vector3(0, 0.1, 0);
 
     this.engine.runRenderLoop(() => {
