@@ -17,20 +17,20 @@ export default class BabylonApp {
   public constructor(renderCanvas: HTMLCanvasElement) {
     this.engine = new Engine(renderCanvas, true);
     this.scene = new Scene(this.engine);
+  }
+
+  public RunAsync = async () => {
+    const webxrTask = this.scene.createDefaultXRExperienceAsync({
+      uiOptions: {
+        sessionMode: 'immersive-ar',
+        referenceSpaceType: 'unbounded',
+        optionalFeatures: ['camera-access'],
+      },
+    });
 
     this.InitScene();
 
-    this.scene
-      .createDefaultXRExperienceAsync({
-        uiOptions: {
-          sessionMode: 'immersive-ar',
-          referenceSpaceType: 'unbounded',
-          optionalFeatures: ['camera-access'],
-        },
-      })
-      .then((xr) => {
-        this.xr = xr;
-      });
+    this.xr = await webxrTask;
 
     this.engine.runRenderLoop(() => {
       this.scene.render();
@@ -39,7 +39,7 @@ export default class BabylonApp {
     document.addEventListener('resize', () => {
       this.engine.resize();
     });
-  }
+  };
 
   private InitScene = () => {
     this.scene.createDefaultCamera(true, true, true);
