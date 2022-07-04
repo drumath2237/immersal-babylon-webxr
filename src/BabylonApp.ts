@@ -6,6 +6,7 @@ import {
   Vector3,
   WebXRDefaultExperience,
 } from '@babylonjs/core';
+import { AdvancedDynamicTexture, Button, Control } from '@babylonjs/gui';
 
 export default class BabylonApp {
   private engine: Engine;
@@ -31,6 +32,7 @@ export default class BabylonApp {
     this.InitScene();
 
     this.xr = await webxrTask;
+    this.InitGUI();
 
     this.engine.runRenderLoop(() => {
       this.scene.render();
@@ -48,5 +50,23 @@ export default class BabylonApp {
 
     const box = MeshBuilder.CreateBox('box', { size: 0.2 }, this.scene);
     box.position = new Vector3(0, 0.1, 0);
+  };
+
+  private InitGUI = () => {
+    const advancedTexture = AdvancedDynamicTexture.CreateFullscreenUI('UI');
+
+    const button = Button.CreateSimpleButton('button', 'button');
+    button.widthInPixels = 800;
+    button.heightInPixels = 150;
+    button.color = 'white';
+    button.cornerRadius = 20;
+    button.background = 'green';
+    button.fontSizeInPixels = 50;
+    button.verticalAlignment = Control.VERTICAL_ALIGNMENT_BOTTOM;
+    button.topInPixels = -10;
+
+    advancedTexture.addControl(button);
+
+    return { button };
   };
 }

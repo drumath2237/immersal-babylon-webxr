@@ -11,7 +11,11 @@ const main = async () => {
     document.getElementById('encoderCanvas')
   );
 
-  if (!renderCanvas || !encoderCanvas) {
+  if (!renderCanvas) {
+    return;
+  }
+
+  if (!encoderCanvas) {
     return;
   }
 
