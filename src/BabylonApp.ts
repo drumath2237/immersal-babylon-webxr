@@ -1,3 +1,4 @@
+import { AdvancedDynamicTexture, Button, Control } from '@babylonjs/gui';
 import {
   DirectionalLight,
   Engine,
@@ -6,7 +7,6 @@ import {
   Vector3,
   WebXRDefaultExperience,
 } from '@babylonjs/core';
-import { AdvancedDynamicTexture, Button, Control } from '@babylonjs/gui';
 
 export default class BabylonApp {
   private engine: Engine;
@@ -32,13 +32,16 @@ export default class BabylonApp {
     this.InitScene();
 
     this.xr = await webxrTask;
-    this.InitGUI();
+
+    this.xr.baseExperience.onStateChangedObservable.add(() => {
+      this.InitGUI();
+    });
 
     this.engine.runRenderLoop(() => {
       this.scene.render();
     });
 
-    document.addEventListener('resize', () => {
+    window.addEventListener('resize', () => {
       this.engine.resize();
     });
   };
@@ -64,9 +67,7 @@ export default class BabylonApp {
     button.fontSizeInPixels = 50;
     button.verticalAlignment = Control.VERTICAL_ALIGNMENT_BOTTOM;
     button.topInPixels = -10;
-
     advancedTexture.addControl(button);
-
     return { button };
   };
 }
