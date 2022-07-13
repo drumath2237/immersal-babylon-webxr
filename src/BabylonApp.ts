@@ -14,6 +14,7 @@ import {
 } from './XRCameraDataUtils';
 import { IPngEncoder } from './IPngEncoder';
 import { CameraIntrinsics } from './CameraIntrinsics';
+import { ImmersalClient } from './ImmersalClient';
 
 export default class BabylonApp {
   private engine: Engine;
@@ -45,7 +46,10 @@ export default class BabylonApp {
     this.xr = await webxrTask;
 
     this.xr.baseExperience.onStateChangedObservable.add(() => {
-      this.InitGUI();
+      const { button } = this.InitGUI();
+      button.onPointerClickObservable.add(() => {
+        this.OnClick();
+      });
     });
 
     this.engine.runRenderLoop(() => {
@@ -80,6 +84,35 @@ export default class BabylonApp {
     button.topInPixels = -10;
     advancedTexture.addControl(button);
     return { button };
+  };
+
+  private OnClick = () => {
+    this.xr?.baseExperience.sessionManager.runInXRFrame(async () => {
+      if (!this.xr) {
+        return;
+      }
+
+      const frame = this.xr.baseExperience.sessionManager.currentFrame;
+      if (frame === null) {
+        return;
+      }
+
+      const intrinsics = this.CreateCameraIntrinsicsFromFrame(frame);
+      const b64Strins = await this.CreateCameraImageBase64StringFromFrameAsync(
+        frame
+      );
+
+      if (intrinsics === null || b64Strins === null) {
+        return;
+      }
+
+      const resMatrix = await ImmersalClient.localizeAsync(
+        b64Strins,
+        intrinsics
+      );
+
+      console.log(resMatrix);
+    }, true);
   };
 
   private CreateCameraIntrinsicsFromFrame = (
