@@ -90,3 +90,5 @@ typings/
 cert.pem
 
 key.pem
+
+.env.local

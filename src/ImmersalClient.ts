@@ -64,12 +64,12 @@ export class ImmersalClient {
     imageB64: string,
     intrinsics: CameraIntrinsics
   ): Promise<Matrix | null> {
-    if (!process.env.API_TOKEN || !process.env.MAP_ID) {
+    if (!import.meta.env.VITE_IMMERSAL_TOKEN || !import.meta.env.VITE_MAP_ID) {
       return null;
     }
 
-    const token: string = process.env.API_TOKEN;
-    const mapId: number = parseInt(process.env.MAP_ID);
+    const token: string = import.meta.env.VITE_IMMERSAL_TOKEN;
+    const mapId: number = import.meta.env.VITE_MAP_ID;
 
     if (!this.immersalLocalizerCore) {
       this.immersalLocalizerCore = new ImmersalLocalizerCore();
