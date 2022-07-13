@@ -7,6 +7,11 @@ import {
   Vector3,
   WebXRDefaultExperience,
 } from '@babylonjs/core';
+import {
+  convertTextureToImageDataAsync,
+  createCameraTexture,
+  getCameraIntrinsics,
+} from './XRCameraDataUtils';
 
 export default class BabylonApp {
   private engine: Engine;
@@ -69,5 +74,41 @@ export default class BabylonApp {
     button.topInPixels = -10;
     advancedTexture.addControl(button);
     return { button };
+  };
+
+  private ProcessCamerImage = async (frame: XRFrame): Promise<void> => {
+    if (!this.xr) {
+      return;
+    }
+
+    const refernceSpace = this.xr.baseExperience.sessionManager.referenceSpace;
+
+    const texture = createCameraTexture(this.engine, refernceSpace, frame);
+
+    if (texture === null) {
+      return;
+    }
+    const imageData = await convertTextureToImageDataAsync(texture);
+
+    const viewerPose = frame.getViewerPose(refernceSpace);
+    if (!viewerPose) {
+      return;
+    }
+
+    const view = viewerPose.views[0];
+    if (!view) {
+      return;
+    }
+
+    const viewport: XRViewport = {
+      x: 0,
+      y: 0,
+      width: (view as any).camera.width,
+      height: (view as any).camera.height,
+    };
+
+    const projectionMatrix = view.projectionMatrix;
+
+    const intrinsics = getCameraIntrinsics(projectionMatrix, viewport);
   };
 }
