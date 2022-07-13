@@ -21,7 +21,7 @@ const main = async () => {
 
   const pngEncoder: IPngEncoder = new CanvasPngEncoder(encoderCanvas);
 
-  const babylonApp = new BabylonApp(renderCanvas);
+  const babylonApp = new BabylonApp(renderCanvas, pngEncoder);
   await babylonApp.RunAsync();
 };
 

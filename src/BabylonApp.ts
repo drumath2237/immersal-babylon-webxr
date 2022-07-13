@@ -12,6 +12,8 @@ import {
   createCameraTexture,
   getCameraIntrinsics,
 } from './XRCameraDataUtils';
+import { IPngEncoder } from './IPngEncoder';
+import { CameraIntrinsics } from './CameraIntrinsics';
 
 export default class BabylonApp {
   private engine: Engine;
@@ -20,9 +22,13 @@ export default class BabylonApp {
 
   private xr?: WebXRDefaultExperience;
 
-  public constructor(renderCanvas: HTMLCanvasElement) {
+  private pngEncoder: IPngEncoder;
+
+  public constructor(renderCanvas: HTMLCanvasElement, encoder: IPngEncoder) {
     this.engine = new Engine(renderCanvas, true);
     this.scene = new Scene(this.engine);
+
+    this.pngEncoder = encoder;
   }
 
   public RunAsync = async () => {
@@ -76,28 +82,23 @@ export default class BabylonApp {
     return { button };
   };
 
-  private ProcessCamerImage = async (frame: XRFrame): Promise<void> => {
+  private CreateCameraIntrinsicsFromFrame = (
+    frame: XRFrame
+  ): CameraIntrinsics | null => {
     if (!this.xr) {
-      return;
+      return null;
     }
 
-    const refernceSpace = this.xr.baseExperience.sessionManager.referenceSpace;
+    const referenceSpace = this.xr.baseExperience.sessionManager.referenceSpace;
 
-    const texture = createCameraTexture(this.engine, refernceSpace, frame);
-
-    if (texture === null) {
-      return;
-    }
-    const imageData = await convertTextureToImageDataAsync(texture);
-
-    const viewerPose = frame.getViewerPose(refernceSpace);
+    const viewerPose = frame.getViewerPose(referenceSpace);
     if (!viewerPose) {
-      return;
+      return null;
     }
 
     const view = viewerPose.views[0];
     if (!view) {
-      return;
+      return null;
     }
 
     const viewport: XRViewport = {
@@ -110,5 +111,32 @@ export default class BabylonApp {
     const projectionMatrix = view.projectionMatrix;
 
     const intrinsics = getCameraIntrinsics(projectionMatrix, viewport);
+
+    return intrinsics;
+  };
+
+  private CreateCameraImageBase64StringFromFrameAsync = async (
+    frame: XRFrame
+  ): Promise<string | null> => {
+    if (!this.xr) {
+      return null;
+    }
+
+    const refernceSpace = this.xr.baseExperience.sessionManager.referenceSpace;
+
+    const texture = createCameraTexture(this.engine, refernceSpace, frame);
+
+    if (texture === null) {
+      return null;
+    }
+    const imageData = await convertTextureToImageDataAsync(texture);
+
+    if (imageData === null) {
+      return null;
+    }
+
+    const b64Image = this.pngEncoder.encodeBase64(imageData);
+
+    return b64Image;
   };
 }
