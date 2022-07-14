@@ -168,8 +168,34 @@ export default class BabylonApp {
       return null;
     }
 
-    const b64Image = this.pngEncoder.encodeBase64(imageData);
+    // Image is vertically flipped
+    // Didn't find a better way to flip the image back
+    const imageFlip = new ImageData(imageData.width, imageData.height);
+    const Npel = imageData.data.length / 4;
+
+    for (let kPel = 0; kPel < Npel; kPel++) {
+      const kFlip = BabylonApp.flip_index(
+        kPel,
+        imageData.width,
+        imageData.height
+      );
+      const offset = 4 * kPel;
+      const offsetFlip = 4 * kFlip;
+      imageFlip.data[offsetFlip] = imageData.data[offset];
+      imageFlip.data[offsetFlip + 1] = imageData.data[offset + 1];
+      imageFlip.data[offsetFlip + 2] = imageData.data[offset + 2];
+      imageFlip.data[offsetFlip + 3] = imageData.data[offset + 3];
+    }
+
+    const b64Image = this.pngEncoder.encodeBase64(imageFlip);
 
     return b64Image;
+  };
+
+  private static flip_index = (kPel: number, width: number, height: number) => {
+    const i = Math.floor(kPel / width);
+    const j = kPel % width;
+
+    return height * width - (i + 1) * width + j;
   };
 }

@@ -51,7 +51,6 @@ class ImmersalLocalizerCore {
         return data.json();
       })
       .then((json) => {
-        console.log(json);
         return json as ResponseLocalizeImage;
       });
   }
@@ -68,22 +67,24 @@ export class ImmersalClient {
       return null;
     }
 
-    const token: string = import.meta.env.VITE_IMMERSAL_TOKEN;
-    const mapId: number = import.meta.env.VITE_MAP_ID;
+    const token = import.meta.env.VITE_IMMERSAL_TOKEN;
+    const mapId = import.meta.env.VITE_MAP_ID as number;
 
     if (!this.immersalLocalizerCore) {
       this.immersalLocalizerCore = new ImmersalLocalizerCore();
     }
 
-    const res = await this.immersalLocalizerCore.localizeRequestAsync({
+    const req: RequestLocalizeImage = {
       b64: imageB64,
-      mapIds: [{ id: mapId }],
+      mapIds: [{ id: parseInt(mapId.toString()) }],
       fx: intrinsics.focalLength.x,
       fy: intrinsics.focalLength.y,
       ox: intrinsics.principalOffset.x,
       oy: intrinsics.principalOffset.y,
       token: token,
-    });
+    };
+
+    const res = await this.immersalLocalizerCore.localizeRequestAsync(req);
 
     const matrix = new Matrix();
     matrix.setRowFromFloats(0, res.r00, res.r01, res.r02, res.px);

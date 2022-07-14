@@ -1,4 +1,4 @@
-import { BaseTexture, Engine } from '@babylonjs/core';
+import { BaseTexture, Engine, RawTexture } from '@babylonjs/core';
 import { CameraIntrinsics } from './CameraIntrinsics';
 
 const createCameraTexture = (
@@ -24,11 +24,25 @@ const createCameraTexture = (
     return null;
   }
 
-  const cameraInternalTexture = engine.wrapWebGLTexture(cameraWebGLTexture);
-  const baseTexture = new BaseTexture(engine);
-  baseTexture._texture = cameraInternalTexture;
+  // const cameraInternalTexture = engine.wrapWebGLTexture(cameraWebGLTexture);
+  // cameraInternalTexture._rebuild();
+  // const baseTexture = new BaseTexture(engine);
+  const hardwareTexture = engine._createHardwareTexture();
 
-  return baseTexture;
+  const width: number = (view as any).camera.width;
+  const height: number = (view as any).camera.height;
+
+  const rawTexture = RawTexture.CreateRGBTexture(
+    new Uint8Array(width * height * 4),
+    width,
+    height,
+    null
+  );
+
+  (rawTexture._texture!._hardwareTexture as any)._webGLTexture =
+    cameraWebGLTexture;
+
+  return rawTexture;
 };
 
 const convertTextureToUint8ArrayAsync = async (
