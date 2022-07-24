@@ -5,6 +5,8 @@ import {
   MeshBuilder,
   Quaternion,
   Scene,
+  SceneLoader,
+  TransformNode,
   Vector3,
   WebXRDefaultExperience,
 } from '@babylonjs/core';
@@ -17,14 +19,14 @@ import { IPngEncoder } from './IPngEncoder';
 import { CameraIntrinsics } from './CameraIntrinsics';
 import { ImmersalClient } from './ImmersalClient';
 
+import mapModel from '../assets/map.babylon?url';
+
 export default class BabylonApp {
   private engine: Engine;
-
   private scene: Scene;
-
   private xr?: WebXRDefaultExperience;
-
   private pngEncoder: IPngEncoder;
+  private mapRootNode?: TransformNode;
 
   public constructor(renderCanvas: HTMLCanvasElement, encoder: IPngEncoder) {
     this.engine = new Engine(renderCanvas, true);
@@ -46,9 +48,10 @@ export default class BabylonApp {
 
     this.xr = await webxrTask;
 
-    this.xr.baseExperience.onStateChangedObservable.add(() => {
+    this.xr.baseExperience.sessionManager.onXRSessionInit.add(() => {
+      console.log('hi');
       const { button } = this.InitGUI();
-      button.onPointerClickObservable.add(() => {
+      button.onPointerUpObservable.add(() => {
         this.OnClick();
       });
     });
@@ -67,8 +70,10 @@ export default class BabylonApp {
 
     new DirectionalLight('light', new Vector3(0.4, -1, 0.6), this.scene);
 
-    const box = MeshBuilder.CreateBox('box', { size: 0.2 }, this.scene);
-    box.position = new Vector3(0, 0.1, 0);
+    const { fileName, folderName } = this.parseModelUrl(mapModel);
+    SceneLoader.AppendAsync(folderName, fileName, this.scene).then((s) => {
+      this.mapRootNode = s.getNodeById('__root__') as TransformNode;
+    });
   };
 
   private InitGUI = () => {
@@ -102,8 +107,8 @@ export default class BabylonApp {
         return;
       }
 
-      const cameraPos = this.scene.activeCamera.position;
-      const cameraRot = this.scene.activeCamera.absoluteRotation;
+      const cameraPos = this.scene.activeCamera.position.clone();
+      const cameraRot = this.scene.activeCamera.absoluteRotation.clone();
 
       const intrinsics = this.CreateCameraIntrinsicsFromFrame(frame);
       const b64Strins = await this.CreateCameraImageBase64StringFromFrameAsync(
@@ -123,12 +128,23 @@ export default class BabylonApp {
         return;
       }
 
-      let pos = Vector3.Zero();
+      let pos: Vector3 = Vector3.Zero();
+      pos = Vector3.Zero();
       let rot = Quaternion.Identity();
       resMatrix.decompose(undefined, rot, pos);
       rot = Quaternion.FromRotationMatrix(resMatrix);
 
-      console.log(pos, rot);
+      const box = MeshBuilder.CreateBox('box', { size: 0.1 }, this.scene);
+      box.position = pos;
+      box.rotationQuaternion = rot;
+
+      if (!this.mapRootNode) {
+        return;
+      }
+
+      this.mapRootNode.setParent(box);
+      box.position = cameraPos;
+      box.rotationQuaternion = cameraRot;
     }, true);
   };
 
@@ -214,5 +230,12 @@ export default class BabylonApp {
     const j = kPel % width;
 
     return height * width - (i + 1) * width + j;
+  };
+
+  private parseModelUrl = (url: string) => {
+    const folderName = url.split('/').slice(0, -1).join('/').concat('/');
+    const fileName = url.split('/').slice(-1)[0];
+
+    return { folderName, fileName };
   };
 }
