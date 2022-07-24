@@ -87,10 +87,11 @@ export class ImmersalClient {
     const res = await this.immersalLocalizerCore.localizeRequestAsync(req);
 
     const matrix = new Matrix();
-    matrix.setRowFromFloats(0, res.r00, res.r01, res.r02, res.px);
-    matrix.setRowFromFloats(1, res.r10, res.r11, res.r12, res.py);
+    matrix.setRowFromFloats(0, -res.r00, -res.r01, -res.r02, -res.px);
+    matrix.setRowFromFloats(1, -res.r10, -res.r11, -res.r12, res.py);
     matrix.setRowFromFloats(2, res.r20, res.r21, res.r22, res.pz);
+    matrix.setRowFromFloats(3, 0, 0, 0, 1);
 
-    return matrix;
+    return matrix.transpose();
   }
 }

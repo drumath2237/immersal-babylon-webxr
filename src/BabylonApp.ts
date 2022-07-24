@@ -3,6 +3,7 @@ import {
   DirectionalLight,
   Engine,
   MeshBuilder,
+  Quaternion,
   Scene,
   Vector3,
   WebXRDefaultExperience,
@@ -97,6 +98,13 @@ export default class BabylonApp {
         return;
       }
 
+      if (!this.scene.activeCamera) {
+        return;
+      }
+
+      const cameraPos = this.scene.activeCamera.position;
+      const cameraRot = this.scene.activeCamera.absoluteRotation;
+
       const intrinsics = this.CreateCameraIntrinsicsFromFrame(frame);
       const b64Strins = await this.CreateCameraImageBase64StringFromFrameAsync(
         frame
@@ -111,7 +119,16 @@ export default class BabylonApp {
         intrinsics
       );
 
-      console.log(resMatrix);
+      if (resMatrix === null) {
+        return;
+      }
+
+      let pos = Vector3.Zero();
+      let rot = Quaternion.Identity();
+      resMatrix.decompose(undefined, rot, pos);
+      rot = Quaternion.FromRotationMatrix(resMatrix);
+
+      console.log(pos, rot);
     }, true);
   };
 
