@@ -49,7 +49,6 @@ export default class BabylonApp {
     this.xr = await webxrTask;
 
     this.xr.baseExperience.sessionManager.onXRSessionInit.add(() => {
-      console.log('hi');
       const { button } = this.InitGUI();
       button.onPointerUpObservable.add(() => {
         this.OnClick();
@@ -76,6 +75,10 @@ export default class BabylonApp {
     });
   };
 
+  /**
+   * create localize button
+   * @returns localize button
+   */
   private InitGUI = () => {
     const advancedTexture = AdvancedDynamicTexture.CreateFullscreenUI('UI');
 
@@ -148,6 +151,11 @@ export default class BabylonApp {
     }, true);
   };
 
+  /**
+   * get intrinsics
+   * @param frame xr frame
+   * @returns camera intrinsics value
+   */
   private CreateCameraIntrinsicsFromFrame = (
     frame: XRFrame
   ): CameraIntrinsics | null => {
@@ -181,6 +189,11 @@ export default class BabylonApp {
     return intrinsics;
   };
 
+  /**
+   * get camera image from xr frame
+   * @param frame xr frame given from request frame
+   * @returns base64 encoded camera image
+   */
   private CreateCameraImageBase64StringFromFrameAsync = async (
     frame: XRFrame
   ): Promise<string | null> => {
@@ -232,6 +245,11 @@ export default class BabylonApp {
     return height * width - (i + 1) * width + j;
   };
 
+  /**
+   * convert path string to scene loader format
+   * @param url asset path
+   * @returns babylon adupted file and folder path string
+   */
   private parseModelUrl = (url: string) => {
     const folderName = url.split('/').slice(0, -1).join('/').concat('/');
     const fileName = url.split('/').slice(-1)[0];
