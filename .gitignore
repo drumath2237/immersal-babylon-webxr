@@ -92,5 +92,3 @@ cert.pem
 key.pem
 
 .env.local
-
-.vscode/launch.json
