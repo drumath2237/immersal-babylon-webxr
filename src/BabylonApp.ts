@@ -27,6 +27,7 @@ export default class BabylonApp {
   private xr?: WebXRDefaultExperience;
   private pngEncoder: IPngEncoder;
   private mapRootNode?: TransformNode;
+  private mapRootInitialPose?: { position: Vector3; quaternion: Quaternion };
 
   public constructor(renderCanvas: HTMLCanvasElement, encoder: IPngEncoder) {
     this.engine = new Engine(renderCanvas, true);
@@ -145,7 +146,25 @@ export default class BabylonApp {
         return;
       }
 
-      this.mapRootNode.setParent(box);
+      this.mapRootNode.parent = null;
+
+      if (this.mapRootInitialPose === undefined) {
+        const mapRootPosition = this.mapRootNode.position.clone();
+        const mapRootQuaternion =
+          this.mapRootNode.rotationQuaternion?.clone() ?? Quaternion.Identity();
+
+        this.mapRootInitialPose = {
+          position: mapRootPosition,
+          quaternion: mapRootQuaternion,
+        };
+      } else {
+        this.mapRootNode.position = this.mapRootInitialPose.position.clone();
+        this.mapRootNode.rotationQuaternion =
+          this.mapRootInitialPose.quaternion.clone();
+      }
+
+      this.mapRootNode.setParent(box, true);
+
       box.position = cameraPos;
       box.rotationQuaternion = cameraRot;
     }, true);
